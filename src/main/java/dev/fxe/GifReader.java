@@ -45,6 +45,9 @@ public class GifReader {
                     case 0xFE: // Comment Extension
                         while (in.read() != 0x00) {}
                         break;
+                    default:
+                        while (in.read() != 0x00) {}
+                        break;
                 }
             }
         }
