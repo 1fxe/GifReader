@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 class GifHeader {
 
-    final String signature;
-    final String version;
+    private final String signature;
+    private final String version;
 
     GifHeader(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[3];
@@ -16,4 +16,11 @@ class GifHeader {
         this.version = new String(buffer);
     }
 
+    public String getSignature() {
+        return signature;
+    }
+
+    public String getVersion() {
+        return version;
+    }
 }

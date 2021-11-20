@@ -6,9 +6,10 @@ import java.io.InputStream;
 import static dev.fxe.GifReader.uInt;
 
 class GifLogicalScreenDescriptor {
-    final int width, height;
-    final int colorResolution, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio;
-    final boolean globalColorTableFlag, sortFlag;
+
+    private final int width, height;
+    private final int colorResolution, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio;
+    private final boolean globalColorTableFlag, sortFlag;
 
     GifLogicalScreenDescriptor(InputStream inputStream) throws IOException {
         this.width = uInt(inputStream.read(), inputStream.read());
@@ -23,5 +24,38 @@ class GifLogicalScreenDescriptor {
         this.backgroundColorIndex = inputStream.read();
         this.pixelAspectRatio = inputStream.read();
     }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public int getPixelAspectRatio() {
+        return this.pixelAspectRatio;
+    }
+
+    public int getColorResolution() {
+        return this.colorResolution;
+    }
+
+    public int getBackgroundColorIndex() {
+        return this.backgroundColorIndex;
+    }
+
+    public int getSizeOfGlobalColorTable() {
+        return this.sizeOfGlobalColorTable;
+    }
+
+    public boolean isGlobalColorTableFlag() {
+        return this.globalColorTableFlag;
+    }
+
+    public boolean isSortFlag() {
+        return this.sortFlag;
+    }
+
 
 }

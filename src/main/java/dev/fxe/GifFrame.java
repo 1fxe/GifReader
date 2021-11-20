@@ -1,6 +1,6 @@
 package dev.fxe;
 
- class GifFrame {
+class GifFrame {
 
     private GifImageData gifImageData;
     private GifImageDescriptor gifImageDescriptor;
