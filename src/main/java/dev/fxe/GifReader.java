@@ -2,14 +2,16 @@ package dev.fxe;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 public class GifReader {
 
     private final InputStream in;
 
     private int width, height;
-    private int globalColorTableFlag, sortFlag, colorResolution, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio;
+    private int colorResolution, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio;
+    boolean globalColorTableFlag;
+    boolean sortFlag;
+
 
     private int[] globalColorTable;
 
@@ -30,38 +32,64 @@ public class GifReader {
             throw new IllegalArgumentException("Invalid Version");
         }
 
-        buffer = new byte[2];
-        in.read(buffer);
-        width = readNum(buffer);
-        in.read(buffer);
-        height = readNum(buffer);
+        // Logical Screen Descriptor
+        width = uInt(in.read(), in.read());
+        height = uInt(in.read(), in.read());
 
-        buffer = new byte[1];
-        in.read(buffer);
-        byte packedFields = buffer[0];
-        globalColorTableFlag = ((packedFields & 0xFF) >> 7);
-        colorResolution = (((packedFields & 0xFF) >> 4) & 7) + 1;
-        sortFlag = ((packedFields & 0xFF) >> 3);
-        sizeOfGlobalColorTable = ((packedFields & 0xFF) >> 3) & 3;
+        int packedFields = in.read();
+        globalColorTableFlag = packedFields >> 7 == 1;
+        colorResolution = ((packedFields >> 6) & 6) + 1;
+        sortFlag = ((packedFields >> 3) & 1) == 1;
+        sizeOfGlobalColorTable = packedFields & 7;
 
-        in.read(buffer);
-        backgroundColorIndex = (buffer[0] & 0xFF);
-        in.read(buffer);
-        pixelAspectRatio = (buffer[0] & 0xFF);
+        backgroundColorIndex = in.read();
+        pixelAspectRatio = in.read();
 
-        if (globalColorTableFlag == 1) {
+        // Global Color Table
+        if (globalColorTableFlag) {
             buffer = new byte[3 * (int) Math.pow(2, sizeOfGlobalColorTable + 1)];
             in.read(buffer);
             globalColorTable = new int[buffer.length];
-            for (int i = 0; i < buffer.length; i++) {
-                globalColorTable[i] = (buffer[i] & 0xFF);
+            for (int i = 0; i < buffer.length; i += 1) {
+                globalColorTable[i] = uByte(buffer[i]);
             }
         }
 
+        int q;
+        while ((q = in.read()) != -1)
+        if (q == 0x21) {
+            q = in.read();
+            switch (q) {
+                case 0x2C: // Image Descriptor
+                    readImageDescriptor(in);
+                    break;
+                case 0xF9: // Graphic Control Extension
+                    break;
+                case 0x01: // Plain Text Extension
+                    break;
+                case 0xFF: // Application Extension
+                    break;
+                case 0xFE: // Comment Extension
+                    break;
+            }
+        }
 
     }
 
-    private int readNum(byte[] buffer) {
-        return (buffer[1] & 0xFF) << 8 | (buffer[0] & 0xFF);
+    private void readImageDescriptor(InputStream in) throws IOException {
+        int imageLeftPosition = uInt(in.read(), in.read());
+        int imageTopPosition = uInt(in.read(), in.read());
+        int imageWidth = uInt(in.read(), in.read());
+        int imageHeight = uInt(in.read(), in.read());
+
+        // Unpack
+    }
+
+    private int uInt(int... i) {
+        return i[0] | i[1] << 8;
+    }
+
+    private int uByte(int b) {
+        return (b & 0xFF);
     }
 }
